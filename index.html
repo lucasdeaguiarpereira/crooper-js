@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Cropper.js</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" crossorigin="anonymous">
+  <link rel="stylesheet" href="cropperjs-master/docs/css/cropper.css">
+  <style>
+    .label {
+      cursor: pointer;
+    }
+    .progress {
+      display: none;
+      margin-bottom: 1rem;
+    }
+
+    .alert {
+      display: none;
+    }
+
+    .img-container img {
+      max-width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Gerenciador de Imagens</h1>
+    <input type="file" id="input" name="image" accept="image/*">
+    <div class="alert" role="alert"></div>
+    <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalLabel">Corte a imagem:</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="img-container">
+              <img id="image" src="">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Voltar</button>
+            <button type="button" class="btn btn-primary" id="crop">Cortar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <h2>Resultado:</h2>
+    <div id="result"></div>
+    <input type="hidden"  name="imgBase64" id="imgBase64" value="teste">
+    <a class="btn btn-primary" id="download" href="javascript:void(0);" download="cropped.jpg">Download</a>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+  <script src="cropperjs-master/docs/js/cropper.js"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', function () {
+      var avatar = document.getElementById('avatar');
+      var image = document.getElementById('image');
+      var input = document.getElementById('input');
+      var $alert = $('.alert');
+      var $modal = $('#modal');
+      var cropper;
+      var button = document.getElementById('crop');
+      var uploadedImageType = 'image/jpeg';
+      var imgBase64 = document.getElementById('imgBase64');
+
+
+      input.addEventListener('change', function (e) {
+        console.log(e.target.files);
+        var files = e.target.files;
+        var done = function (url) {
+          input.value = '';
+          image.src = url;
+          $alert.hide();
+          $modal.modal('show');
+        };
+        var reader;
+        var file;
+        var url;
+
+        if (files && files.length > 0) {
+          file = files[0];
+
+          if (URL) {
+            done(URL.createObjectURL(file));
+          } else if (FileReader) {
+            reader = new FileReader();
+            reader.onload = function (e) {
+              done(reader.result);
+            };
+            reader.readAsDataURL(file);
+          }
+        }
+      });
+
+      $modal.on('shown.bs.modal', function () {
+        cropper = new Cropper(image, {
+          aspectRatio: 1,
+          viewMode: 3,
+        });
+      }).on('hidden.bs.modal', function () {
+        cropper.destroy();
+        cropper = null;
+      });
+
+      button.onclick = function (event) {
+        result.innerHTML = '';
+        imgBase64.value = cropper.getCroppedCanvas({ width: 300, height: 300 }).toDataURL(uploadedImageType);
+        result.appendChild(cropper.getCroppedCanvas({ width: 300, height: 300 }));
+        download.href = cropper.getCroppedCanvas({ width: 300, height: 300 }).toDataURL(uploadedImageType);
+      };
+   
+    });
+  </script>
+</body>
+</html>

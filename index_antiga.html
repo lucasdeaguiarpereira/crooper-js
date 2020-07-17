@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Cropper.js</title>
+  <link rel="stylesheet" href="cropperjs-master/docs/css/cropper.css">
+  <style>
+    .container {
+      margin: 20px auto;
+      max-width: 640px;
+    }
+
+    img {
+      max-width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <input type='file' id="uploadBannerImage" onchange="readURL(this);" />
+    <h1>Minimum and maximum cropped dimensions</h1>
+    <h3>Image</h3>
+    <div>
+      <img id="image" src="" alt="Picture">
+    </div>
+    <p>Data: <span id="data"></span></p>
+    <h3>Result</h3>
+    <p>
+      <button type="button" id="button">Crop</button>
+    </p>
+    <div id="result"></div>
+    <a class="btn btn-primary" id="download" href="javascript:void(0);" download="cropped.jpg">Download</a>
+  </div>
+  <script src="cropperjs-master/docs/js/cropper.js"></script>
+  <script>
+
+    function readURL(input) 
+    {
+        document.getElementById("image").style.display = "block";
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                document.getElementById('image').src =  e.target.result;
+            }
+
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', function () {
+      var image = document.querySelector('#image');
+      var data = document.querySelector('#data');
+      var button = document.getElementById('button');
+      var result = document.getElementById('result');
+      var download = document.getElementById('download');
+      var minCroppedWidth = 300;
+      var minCroppedHeight = 300;
+      var maxCroppedWidth = 650;
+      var maxCroppedHeight = 650;
+      var uploadedImageType = 'image/jpeg';
+      var cropper = new Cropper(image, {
+        aspectRatio: 1,
+        viewMode: 3,
+        imageSmoothingEnabled: true,
+        imageSmoothingQuality: 'low',
+        data: {
+          width: (minCroppedWidth + maxCroppedWidth) / 2,
+          height: (minCroppedHeight + maxCroppedHeight) / 2,
+        },
+
+        crop: function (event) {
+          var width = event.detail.width;
+          var height = event.detail.height;
+
+
+          if (
+            width < minCroppedWidth
+            || height < minCroppedHeight
+            || width > maxCroppedWidth
+            || height > maxCroppedHeight
+          ) {
+            cropper.setData({
+              width: Math.max(minCroppedWidth, Math.min(maxCroppedWidth, width)),
+              height: Math.max(minCroppedHeight, Math.min(maxCroppedHeight, height)),
+            });
+          }
+
+          data.textContent = JSON.stringify(cropper.getData(true));
+        },
+      });
+
+      button.onclick = function (event) {
+        result.innerHTML = '';
+        result.appendChild(cropper.getCroppedCanvas({ width: 300, height: 300 }));
+        console.log(cropper.getCroppedCanvas({ width: 300, height: 300 }).toDataURL(uploadedImageType));
+        download.href = cropper.getCroppedCanvas({ width: 300, height: 300 }).toDataURL(uploadedImageType);
+      };
+    });
+  </script>
+</body>
+</html>
